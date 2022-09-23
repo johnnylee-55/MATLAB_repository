@@ -1,0 +1,5 @@
+answer = inputdlg(prompt)
+answer = inputdlg(prompt,title)
+answer = inputdlg(prompt,title,dims)
+answer = inputdlg(prompt,title,dims,definput)
+answer = inputdlg(prompt,title,dims,definput,opts)
