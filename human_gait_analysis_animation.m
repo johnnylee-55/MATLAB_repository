@@ -1,5 +1,6 @@
 clc
 
+% generates an animation
 set(groot,'defaultLineLineWidth',1);
 for i = 1:243 %data length
     
