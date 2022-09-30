@@ -1,7 +1,7 @@
 clc
 
 % import joint x,y positions Tracker
-t1 = timeTracker;
+t1 = time;
 
 x1 = DIPx;
 y1 = DIPy;
@@ -62,11 +62,5 @@ xlabel('time (s)');
 ylabel('Degrees');
 grid on;
 
-% import voltage data from strain guage sensor
-t2 = timeSensor;
-V = voltageSensor;
-figure
-plot(t2,V)
-title('Voltage over time from Strain Guage');
-xlabel('time (s)');
-ylabel('Voltage (V)')
+
+% import Voltage data from 
