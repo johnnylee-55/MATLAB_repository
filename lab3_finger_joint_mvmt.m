@@ -72,12 +72,17 @@ title('Voltage over time from Strain Guage');
 xlabel('time (s)');
 ylabel('Voltage (V)')
 
+% resample data sets here
+
+% prior to using QuadFit, data must be resampled to have the same length
+resultCoefficients = QuadFit(voltageSensor, PIPangle)
+
+function a = QuadFit(x,y)
 % takes set of points (x,y) and outputs the coefficients found by the
 % quadratic regression (a0, a1, a2) where y(x)= a2*x^2 + a1*x + a0
-function a = QuadFit(x,y)
 
 % number of loops
-n = length(V);
+n = length(x);
 
 % find the sums needed for building two equations for solving least squares
 % best-fit method
@@ -96,9 +101,29 @@ for i = 1:n
 end
 
 % matrix set up
-A = [ n s_x1 s_x2 ; s_x s_x2 s_x3 ; s_x2 s_3 s_x4 ];
+A = [ n s_x1 s_x2 ; s_x1 s_x2 s_x3 ; s_x2 s_x3 s_x4 ];
 b = [ s_y ; s_xy ; s_x2y ];
 
 c = gauss(A,b);
-a = [ c(3) c(2) c(1) ]
+a = [ c(3) c(2) c(1) ];
+end
+
+function x = gauss(A,b)
+
+n = length(b);
+for k = 1:n-2
+    for i = k+1:n
+        if A(i,k) ~= 0
+            lambda = A(i,k)/A(k,k);
+            A(i,k+1:n) = A(i,k+1:n) - lambda * A(k,k+1:n);
+            b(i) = b(i) - lambda * b(k);
+        end
+    end
+end
+
+% back substitution phase
+for k = n:-1:1
+    b(k) = (b(k) - A(k,k+1:n) * b(k+1:n)) / A(k,k);
+end
+x = b;
 end
