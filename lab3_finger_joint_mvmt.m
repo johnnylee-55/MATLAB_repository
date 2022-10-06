@@ -17,20 +17,20 @@ for x = 1:1:802 %each x,y position of each joint has 802 points of data
     k = k + 1;
 
     % distance between each joint
-    D12(k) = (x1(k) - x2(k))^2 + (y1(k) - y2(k))^2;
-    D23(k) = (x2(k) - x3(k))^2 + (y2(k) - y3(k))^2;
-    D31(k) = (x3(k) - x1(k))^2 + (y3(k) - y1(k))^2;
+    Dist12(k) = (x1(k) - x2(k))^2 + (y1(k) - y2(k))^2;
+    Dist23(k) = (x2(k) - x3(k))^2 + (y2(k) - y3(k))^2;
+    Dist31(k) = (x3(k) - x1(k))^2 + (y3(k) - y1(k))^2;
 
     % calculate side length of each triangle
-    S12(k) = sqrt(D12(k));
-    S23(k) = sqrt(D23(k));
-    S31(k) = sqrt(D31(k));
+    Side12(k) = sqrt(D12(k));
+    Side23(k) = sqrt(D23(k));
+    Side31(k) = sqrt(Dist31(k));
 
     % calculate PIP joint angles from distances and side lengths
-    PIPangle(k) = acosd((D31(k) - D23(k) - D12(k)) / (-2*S12(k)*S23(k)));
+    PIPangle(k) = acosd((Dist31(k) - D23(k) - D12(k)) / (-2*Side12(k)*Side23(k)));
 end
 
-% plot data points
+% plot X,Y positions of joints over time
 subplot (2,2,1)
 plot(x1, y1, 'or');
 title('Position of DIP Joint over time');
@@ -51,35 +51,51 @@ title('Position of MCP Joint over time');
 xlabel('X Position of MCP Joint (cm)');
 ylabel('Y Position of MCP Joint (cm)');
 
-% plot PIP joint angle over time (you need to add a title and axis labels to the
-% graph)
+% plot PIP joint angle over time
 k = 1:1:802; % length of data is 802
 
-subplot (2, 2, 4)
+subplot(2, 2, 4)
 plot(t1(k), PIPangle(k), '--');
 title('Angle of PIP Joint over time');
-xlabel('time (s)');
+xlabel('Time (s)');
 ylabel('Degrees');
 grid on;
 
 % import voltage data from strain guage sensor
 t2 = timeSensor;
 V = voltageSensor;
+
 % plot voltage vs time from strain guage
 figure
 plot(t2,V)
 title('Voltage over time from Strain Guage');
-xlabel('time (s)');
+xlabel('Time (s)');
 ylabel('Voltage (V)')
 
-% resample data sets here
+% resample data sets to have 800 data points
+voltageRS = resample(voltageSensor, 800, 799);
+angleRS = resample(PIPangle, 800, 802);
 
 % prior to using QuadFit, data must be resampled to have the same length
-resultCoefficients = QuadFit(voltageSensor, PIPangle)
+resultCoefficients = QuadFit(voltageRS, angleRS)
 
-function a = QuadFit(x,y)
+% plot resampled voltage/PIPangle with quadratic fit equation
+figure
+plot(voltageRS, angleRS,'b--o')
+hold on
+a1 = resultCoefficients(1);
+a2 = resultCoefficients(2);
+a3 = resultCoefficients(3);
+x = 0.75:.1:2.5;
+y = (a1*x.^2 + a2*x + a3);
+plot(x,y,'r','LineWidth', 2.0)
+title('Voltage vs PIPjoint Angle with Quadratic Line Fit')
+xlabel('Voltage (V)')
+ylabel('PIP Joint Angle Measurement (degrees)')
+
 % takes set of points (x,y) and outputs the coefficients found by the
 % quadratic regression (a0, a1, a2) where y(x)= a2*x^2 + a1*x + a0
+function a = QuadFit(x,y)
 
 % number of loops
 n = length(x);
@@ -108,6 +124,7 @@ c = gauss(A,b);
 a = [ c(3) c(2) c(1) ];
 end
 
+% matrix calculation
 function x = gauss(A,b)
 
 n = length(b);
