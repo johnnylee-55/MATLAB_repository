@@ -62,18 +62,18 @@ xlabel('Time (s)');
 ylabel('Degrees');
 grid on;
 
-% import voltage data from strain guage sensor
+% import voltage data from strain gauge sensor
 t2 = timeSensor;
 V = voltageSensor;
 
-% plot voltage vs time from strain guage
+% plot voltage vs time from strain gauge
 figure
 plot(t2,V)
 title('Voltage over time from Strain Guage');
 xlabel('Time (s)');
 ylabel('Voltage (V)')
 
-% priot to using QuadFit(), resample both data sets to have 800 data points
+% prior to using QuadFit(), resample both data sets to have 800 data points
 voltageRS = resample(voltageSensor, 800, 799);
 angleRS = resample(PIPangle, 800, 802);
 
@@ -95,7 +95,7 @@ ylabel('PIP Joint Angle Measurement (degrees)')
 
 %{
  takes set of points (x,y) and outputs the coefficients found by the
- quadratic regression (a0, a1, a2) where y(x)= a2*x^2 + a1*x + a0
+ quadratic regression (a1, a2, a3) where y(x)= a1*x^2 + a2*x + a3
 %}
 function a = QuadFit(x,y)
 
@@ -126,7 +126,7 @@ c = gauss(A,b);
 a = [ c(3) c(2) c(1) ];
 end
 
-% matrix calculation using Guass Elimination
+% matrix calculation using Gauss Elimination
 function x = gauss(A,b)
 
 n = length(b);
