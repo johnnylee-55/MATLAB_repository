@@ -43,13 +43,20 @@ for i = 1:ppgPeaks-1
     e(index) = peakPos(i+1) - peakPos(i);
     index = index + 1;
 end
+
 % peak detection of red light
-[redPkVal, redPkPos, redPkInd] = detectPeaks(redSegment, DCred);
+[ACredSignal, ACredPosition] = detectACPeaks(redSegment, DCred);
+
+% peak detection of infrared light
+[ACinfraSignal, ACinfraPosition] = detectACPeaks(infraredSegment, DCinfrared);
 
 
+
+
+%% Function Definitions
 function [peakVal, peakPos, peakInd] = detectPeaks(array, threshold)
-peakInd = 1;
-n = length(array);
+    peakInd = 1;
+    n = length(array);
     for i = 2 : n-1
         if array(i) > array(i-1) && array(i) > array(i+1) && array(i) > threshold
             peakVal(peakInd) = array(i);
@@ -59,7 +66,17 @@ n = length(array);
     end
 end
 
-function [peakVal, peakPos, ] = detectPPGPeaks(array, halfPulseLength)
-  
+
+function [ACsignal, peakPos] = detectACPeaks(array, DC)
+    index = 1;
+    n = length(array);
+    for i=2:n-1
+        if(array(i)>array(i-1) && array(i)>=array(i+1) && array(i) > DC)
+            peakVal(index) = array(i);
+            peakPos(index) = i;
+            ACsignal(index) = array(peakPos(index));
+            index = index + 1;
+        end
+    end
 end
 
