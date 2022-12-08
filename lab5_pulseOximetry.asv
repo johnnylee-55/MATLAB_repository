@@ -32,10 +32,11 @@ c = 100;
 % peak detection of PPG
 red = lowpass(red, 20, fs);
 redSegment = red(2300:2852);
-infraredSegment = flatSegment;
+infraredSegment = infrared(2300:2852);
 
 DCred = rms(redSegment);
-DCinfrared = rms(flatSegment);
+DCinfrared = rms(infraredSegment);
+
 
 
 index = 1;
@@ -45,11 +46,19 @@ for i = 1:ppgPeaks-1
 end
 
 % peak detection of red light
-[ACred, A] = detectPPGPeaks(redSegment, DCred);
+[redPeakVal, ACredPosition, AcredSignal] = detectACPeaks(redSegment, DCred);
 
 % peak detection of infrared light
+DCinfrared = DCinfrared + 1000; % +1000 for better peak detection
+[infraPeakVal, ACinfraPosition, ACinfraSignal] = detectACPeaks(infraredSegment, DCinfrared);
 
+% SpO2 calculation
+for i = 1 : index - 1
+    R(i) = ((redPeakVal(i)-ACredSignal(i))/DCred)/((infraPeakVal(i)-ACinfraSignal(i))/DCinfrared);
+    SpO2(i) = (a*R(i)*R(i)) + (b*) +
+end
 
+%% Function Definitions
 function [peakVal, peakPos, peakInd] = detectPeaks(array, threshold)
     peakInd = 1;
     n = length(array);
@@ -63,11 +72,11 @@ function [peakVal, peakPos, peakInd] = detectPeaks(array, threshold)
 end
 
 
-function [ACsignal, peakPos] = detectPPGPeaks(array, DC)
+function [peakVal, peakPos, ACsignal] = detectACPeaks(array, DC)
     index = 1;
     n = length(array);
     for i=2:n-1
-        if(array(i)>array(i-1) && array(i)>=array(i+1) && array(i) > DC)
+        if array(i)>array(i-1) && array(i)>=array(i+1) && array(i) > DC
             peakVal(index) = array(i);
             peakPos(index) = i;
             ACsignal(index) = array(peakPos(index));
@@ -75,4 +84,3 @@ function [ACsignal, peakPos] = detectPPGPeaks(array, DC)
         end
     end
 end
-
