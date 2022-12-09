@@ -1,13 +1,16 @@
 %% Peak Detection
 fs = 128;
+boundLower = 11050;
+boundUpper = 12200;
 
 % filter data with lowpass
-% infrared data is used here to find heart rate
-infrared = lowpass(infrared, 20, fs);
-flatSegment = infrared(2300:2852);
+% red data is used here to find heart rate
+redSegment = red(boundLower-50:boundUpper+50);
+redSegment = lowpass(redSegment, 10, fs);
+redSegment = redSegment(50:boundUpper-boundLower+50);
 
 % peak detection function, defined at bottom of file
-[peakVal, peakPos, peakIndex] = detectPeaks(flatSegment, 286000);
+[peakVal, peakPos, peakIndex] = detectPeaks(redSegment, 363500);
 
 ppgPeaks = peakIndex - 1;
 
@@ -23,7 +26,7 @@ heartRateValues = (60./e)*128;
 
 
 %% SpO2
-t = 1:1:553;
+t = 1:1:boundUpper-boundLower+1;
 t2 = t/128;
 t2 = t2';
 
@@ -32,9 +35,10 @@ a = -16.666667;
 b = 8.333333;
 c = 100;
 % peak detection of PPG
-red = lowpass(red, 20, fs);
-redSegment = red(2300:2852);
-infraredSegment = infrared(2300:2852);
+infraredSegment = infrared(boundLower-50:boundUpper+50);
+infraredSegment = lowpass(infraredSegment, 5, fs);
+infraredSegment = infraredSegment(50:boundUpper-boundLower+50);
+
 
 DCred = rms(redSegment);
 DCinfrared = rms(infraredSegment);
@@ -46,15 +50,16 @@ for i = 1:ppgPeaks-1
     index = index + 1;
 end
 
+
 % peak detection of red light
-[redPeakVal, ACredPosition, AcredSignal] = detectACPeaks(redSegment, DCred);
+[redPeakVal, ACredPosition, ACredSignal] = detectACPeaks(redSegment, 363500);
 
 % peak detection of infrared light
 DCinfrared = DCinfrared + 1000; % +1000 for better peak detection
-[infraPeakVal, ACinfraPosition, ACinfraSignal] = detectACPeaks(infraredSegment, DCinfrared);
+[infraPeakVal, ACinfraPosition, ACinfraSignal] = detectACPeaks(infraredSegment, 268500);
 
 % SpO2 calculation
-for i = 1 : index
+for i = 1 : length(ACredPosition)
     R(i) = ((redPeakVal(i)-ACredSignal(i))/DCred)/((infraPeakVal(i)-ACinfraSignal(i))/DCinfrared);
     SpO2(i) = a*R(i)*R(i) + (b*R(i)) + c;
 end
@@ -64,7 +69,8 @@ yyaxis left
 plot(t2, redSegment); hold on; plot(t2, infraredSegment); hold on;
 yyaxis right
 plot(ACredPosition/128, SpO2);
-axis([0 5 80 110])
+axis([0 10 80 110])
+
 
 %% Function Definitions
 function [peakVal, peakPos, peakInd] = detectPeaks(array, threshold)
@@ -79,14 +85,14 @@ function [peakVal, peakPos, peakInd] = detectPeaks(array, threshold)
     end
 end
 
-function [peakVal, peakPos, ACsignal] = detectACPeaks(array, DC)
+function [peakVal, peakPos, ACsignal] = detectACPeaks(array, threshold)
     index = 1;
     n = length(array);
     for i=2:n-1
-        if array(i)>array(i-1) && array(i)>=array(i+1) && array(i) > DC
+        if array(i)>array(i-1) && array(i)>=array(i+1) && array(i) > threshold
             peakVal(index) = array(i);
             peakPos(index) = i;
-            ACsignal(index) = array(peakPos(index)-25);
+            ACsignal(index) = array(peakPos(index)-40);
             index = index + 1;
         end
     end
