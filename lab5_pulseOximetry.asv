@@ -65,7 +65,7 @@ for i = 1 : length(ACredPosition)
 end
 
 % plot SpO2
-figure(1)
+figure
 yyaxis left
 plot(t2, redSegment); hold on; plot(t2, infraredSegment); hold on;
 yyaxis right
@@ -73,16 +73,13 @@ plot(ACredPosition/128, SpO2);
 axis([0 10 80 110]);
 legend('red', 'infrared', 'SpO2');
 title('Measured SpO2 levels')
-hold off;
 
 % heart rate animation
-figure(2)
+figure
 set(groot,'defaultLineLineWidth',1);
 for i = 1:boundUpper-boundLower
-    plot(t(i),redSegment(i), 'ro');
-    axis([0 1151 350000 370000])
-    hold on;
-    drawnow
+    plot(i,redSegment(i));
+    axis([0 10 3500])
 end
 
 
