@@ -65,7 +65,7 @@ for i = 1 : length(ACredPosition)
 end
 
 % plot SpO2
-figure
+figure(1)
 yyaxis left
 plot(t2, redSegment); hold on; plot(t2, infraredSegment); hold on;
 yyaxis right
@@ -73,15 +73,27 @@ plot(ACredPosition/128, SpO2);
 axis([0 10 80 110]);
 legend('red', 'infrared', 'SpO2');
 title('Measured SpO2 levels')
+hold off;
 
 % heart rate animation
-figure
+%{
+figure(2)
 set(groot,'defaultLineLineWidth',1);
 for i = 1:boundUpper-boundLower
-    plot(i,redSegment(i));
-    axis([0 10 3500])
+    plot(t(i),redSegment(i), 'ro');
+    axis([0 1151 350000 370000])
+    hold on;
+    drawnow
 end
+%}
 
+% plot heart rate values
+for i=1:8
+    heartRatePos(i) = peakPos(i);
+end
+figure(2)
+plot(t2, redSegment); hold on;
+plot(heartRatePos, heartRateValues);
 
 %% Function Definitions
 function [peakVal, peakPos, peakInd] = detectPeaks(array, threshold)

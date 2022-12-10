@@ -76,6 +76,7 @@ title('Measured SpO2 levels')
 hold off;
 
 % heart rate animation
+%{
 figure(2)
 set(groot,'defaultLineLineWidth',1);
 for i = 1:boundUpper-boundLower
@@ -84,7 +85,21 @@ for i = 1:boundUpper-boundLower
     hold on;
     drawnow
 end
+%}
 
+% plot heart rate values
+for i=1:8
+    heartRatePos(i) = peakPos(i);
+end
+figure(2)
+yyaxis left
+plot(redSegment); hold on;
+yyaxis right
+plot(heartRatePos, heartRateValues, 'ro');
+axis([0 1151 50 80])
+legend('red', 'Heart Rate Value');
+title('Heart Rate Values')
+hold off;
 
 %% Function Definitions
 function [peakVal, peakPos, peakInd] = detectPeaks(array, threshold)
